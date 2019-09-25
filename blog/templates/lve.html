@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css">
+     <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    </head>
+<body>
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Desc</th>
+      <th scope="col">User</th>
+      <th scope="col">Date</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for leave in lvs %}
+    <tr>
+
+      <td>{{ leave.desc }}</td>
+      <td>{{ leave.user__firstName }}</td>
+      <td>{{ leave.date }}</td>
+      <td><input type="button" id="{{ leave.leaveId }}" class="btn btn-primary update" value="Update"></td>
+
+    </tr>
+   {% endfor %}
+  </tbody>
+</table>
+
+
+<div class="modal" id="myModal" role="dialog">
+    <div class="modal-dialog">
+
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Modal Header</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row" >
+            <div class="col-md-12 col-sm-3 col-6 " >
+                <table class="table hover viewDataTable" id="viewDataTable">
+                     <thead>
+                    {{ lveEditform }}
+                     </thead>
+                 </table>
+            </div>
+        </div>
+        </div>
+          <input type="text" id="lveId" style="display:none">
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-default pull-left" id="sbtBtn">Submit</button>
+        </div>
+      </div>
+
+    </div>
+ </div>
+<script>
+
+    $(document).on('click', '#sbtBtn', function() {
+            var desc = $('#id_desc').val();
+        var date = $('#id_date').val();
+        var lveId = $('#lveId').val();
+        var data ={'desc':desc,'date':date,'lveId':lveId};
+         $.ajax({
+                  url: "/SavefetchParticularLveData",
+                  type: "POST",
+                  dataType: "json",
+                  data: JSON.stringify(data),
+                  contentType: false,
+                  processData: false,
+                  async:false,
+                  success: function (result)
+                  {
+                    if (result.status == 'success') {
+                    alert("success");
+                    }
+                    }
+                   });
+    });
+
+    $(document).on('click', '.update', function() {
+    var id = $(this).attr('id');
+    var data = { "id": id};
+            $.ajax({
+            url: "/fetchParticularLveData",
+            type: "POST",
+            dataType: "json",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function (result)
+            {
+                if (result.status == 'success') {
+                $.each(result.lve, function (key, val) {
+                $('#id_desc').val(val.desc);
+               $('#id_date').val(val.date);
+               $('#lveId').val(val.leaveId);
+                   });
+                }else {
+                    alert('error');
+                }
+        }
+
+        });
+
+                    $('#myModal').modal('show');
+
+       });
+
+
+</script>
+</body>
+</html>
